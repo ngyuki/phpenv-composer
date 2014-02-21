@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Summary: phpenv composer plugin
+
+set -e
+[ -n "$RBENV_DEBUG" ] && set -x
+
+if [ "$(phpenv version-name)" == "system" ]; then
+  echo "composer plugin only no system version" 1>&2
+  exit 1
+fi
+
+prefix=$(phpenv prefix)
+
+if [ -z "$prefix" ]; then
+  echo "cannot get phpenv prefix" 1>&2
+  exit 1
+fi
+
+composer_bin=$prefix/bin/composer
+composer_home=$prefix/composer
+composer_phar=$prefix/composer/composer.phar
+
+if [ ! -d "$composer_home" ]; then
+  mkdir -p "$composer_home"
+fi
+
+if [ ! -f "$composer_home/composer.phar" ]; then
+  echo "Download composer.phar ..." 1>&2
+
+  tmp="$(dirname "$(mktemp --dry-run 2>/dev/null)")"
+  tmp=${tmp:-/tmp}
+
+  curl -sS https://getcomposer.org/installer | php -- --install-dir="$tmp"
+
+  if [ $? -eq 0 ]; then
+    echo "Move composer.phar to $composer_home" 1>&2
+    mv "$tmp/composer.phar" "$composer_home/composer.phar"
+  fi
+fi
+
+if [ ! -f "$composer_home/composer.phar" ]; then
+  echo "composer.phar notfount" 1>&2
+  exit 1
+fi
+
+cat > "$composer_bin" <<EOS
+#!/usr/bin/env bash
+
+prefix=$prefix
+
+php_bin=\$prefix/bin/php
+composer_home=\$prefix/composer
+composer_phar=\$prefix/composer/composer.phar
+
+export COMPOSER_CACHE_DIR=\$("\$php_bin" "\$composer_phar" config -g cache-dir)
+export COMPOSER_HOME=\$composer_home
+
+"\$php_bin" "\$composer_phar" "\$@"
+EOS
+
+chmod +x "$composer_bin"
+
+exit 0

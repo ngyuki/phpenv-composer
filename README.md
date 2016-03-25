@@ -1,5 +1,7 @@
 # phpenv composer plugin
 
+[![Build Status](https://travis-ci.org/ngyuki/phpenv-composer.svg?branch=master)](https://travis-ci.org/ngyuki/phpenv-composer)
+
 ## Install
 
 ```console

@@ -4,7 +4,9 @@ language: php
 sudo: false
 
 before_script:
-  - git clone https://github.com/ngyuki/phpenv-composer.git ~/.phpenv/plugins/phpenv-composer
+  #- git clone https://github.com/ngyuki/phpenv-composer.git ~/.phpenv/plugins/phpenv-composer
+  - mkdir -p ~/.phpenv/plugins/
+  - ln -sfn "$PWD" ~/.phpenv/plugins/phpenv-composer
   - rm -f ~/.phpenv/versions/*/etc/conf.d/xdebug.ini
   - phpenv rehash
 

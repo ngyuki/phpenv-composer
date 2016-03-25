@@ -1,0 +1,27 @@
+language: php
+
+#sudo: required
+sudo: false
+
+before_script:
+  - git clone https://github.com/ngyuki/phpenv-composer.git ~/.phpenv/plugins/phpenv-composer
+  - rm -f ~/.phpenv/versions/*/etc/conf.d/xdebug.ini
+  - phpenv rehash
+
+script:
+  - which composer
+  - phpenv which composer
+  - composer --version
+  - ls -l "$(phpenv prefix)/composer/composer.phar"
+
+  - composer config -g home
+  - test "$(composer config -g home)" == "$(phpenv prefix)/composer"
+
+  - composer config -g cache-dir
+  - test "$(composer config -g cache-dir)" == "$HOME/.composer/cache"
+
+  - composer global require phpunit/phpunit
+  - phpenv rehash
+
+  - phpenv which phpunit
+  - test "$(phpenv which phpunit)" == "$(phpenv prefix)/composer/vendor/bin/phpunit"
